@@ -1,0 +1,1262 @@
+<!doctype html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang=""> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8" lang=""> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9" lang=""> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang=""> <!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Real Time SDR</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- <link rel="stylesheet" href="bootstrap.min.css"> -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <!-- <script src="jquery-2.1.4.min.js"></script> -->
+        <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+        <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-autocomplete/1.0.7/jquery.auto-complete.min.css" integrity="sha512-TfnGOYsHIBHwx3Yg6u6jCWhqz79osu5accjEmw8KYID9zfWChaGyjDCmJIdy9fJjpvl9zXxZamkLam0kc5p/YQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-autocomplete/1.0.7/jquery.auto-complete.min.js" integrity="sha512-TToQDr91fBeG4RE5RjMl/tqNAo35hSRR4cbIFasiV2AAMQ6yKXXYhdSdEpUcRE6bqsTiB+FPLPls4ZAFMoK5WA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
+        <!-- <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+      <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script> -->
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.devbridge-autocomplete/1.2.27/jquery.autocomplete.min.js"></script> -->
+    <!-- <script type="text/javascript" src="wsse.js"></script> -->
+      <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script>
+
+    /*
+     *  * A JavaScript implementation of the Secure Hash Algorithm, SHA-1, as defined
+     *   * in FIPS PUB 180-1
+     *    * Version 2.1 Copyright Paul Johnston 2000 - 2002.
+     *     * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
+     *      * Distributed under the BSD License
+     *       * See http://pajhome.org.uk/crypt/md5 for details.
+     *        */
+
+    /*
+     *  * Configurable variables. You may need to tweak these to be compatible with
+     *   * the server-side, but the defaults work in most cases.
+     *    */
+    var hexcase = 0;   /* hex output format. 0 - lowercase; 1 - uppercase        */
+    var b64pad  = "="; /* base-64 pad character. "=" for strict RFC compliance   */
+    var chrsz   = 8;   /* bits per input character. 8 - ASCII; 16 - Unicode      */
+
+    /*
+     *  * These are the functions you'll usually want to call
+     *   * They take string arguments and return either hex or base-64 encoded strings
+     *    */
+    function hex_sha1(s){return binb2hex(core_sha1(str2binb(s),s.length * chrsz));}
+    function b64_sha1(s){return binb2b64(core_sha1(str2binb(s),s.length * chrsz));}
+    function str_sha1(s){return binb2str(core_sha1(str2binb(s),s.length * chrsz));}
+    function hex_hmac_sha1(key, data){ return binb2hex(core_hmac_sha1(key, data));}
+    function b64_hmac_sha1(key, data){ return binb2b64(core_hmac_sha1(key, data));}
+    function str_hmac_sha1(key, data){ return binb2str(core_hmac_sha1(key, data));}
+
+    /*
+     *  * Perform a simple self-test to see if the VM is working
+     *   */
+    function sha1_vm_test()
+    {
+      return hex_sha1("abc") == "a9993e364706816aba3e25717850c26c9cd0d89d";
+    }
+
+    /*
+     *  * Calculate the SHA-1 of an array of big-endian words, and a bit length
+     *   */
+    function core_sha1(x, len)
+    {
+      /* append padding */
+      x[len >> 5] |= 0x80 << (24 - len % 32);
+      x[((len + 64 >> 9) << 4) + 15] = len;
+
+      var w = Array(80);
+      var a =  1732584193;
+      var b = -271733879;
+      var c = -1732584194;
+      var d =  271733878;
+      var e = -1009589776;
+
+      for(var i = 0; i < x.length; i += 16)
+      {
+        var olda = a;
+        var oldb = b;
+        var oldc = c;
+        var oldd = d;
+        var olde = e;
+
+        for(var j = 0; j < 80; j++)
+        {
+          if(j < 16) w[j] = x[i + j];
+          else w[j] = rol(w[j-3] ^ w[j-8] ^ w[j-14] ^ w[j-16], 1);
+          var t = safe_add(safe_add(rol(a, 5), sha1_ft(j, b, c, d)),
+                           safe_add(safe_add(e, w[j]), sha1_kt(j)));
+          e = d;
+          d = c;
+          c = rol(b, 30);
+          b = a;
+          a = t;
+        }
+
+        a = safe_add(a, olda);
+        b = safe_add(b, oldb);
+        c = safe_add(c, oldc);
+        d = safe_add(d, oldd);
+        e = safe_add(e, olde);
+      }
+      return Array(a, b, c, d, e);
+
+    }
+
+    /*
+     *  * Perform the appropriate triplet combination function for the current
+     *   * iteration
+     *    */
+    function sha1_ft(t, b, c, d)
+    {
+      if(t < 20) return (b & c) | ((~b) & d);
+      if(t < 40) return b ^ c ^ d;
+      if(t < 60) return (b & c) | (b & d) | (c & d);
+      return b ^ c ^ d;
+    }
+
+    /*
+     *  * Determine the appropriate additive constant for the current iteration
+     *   */
+    function sha1_kt(t)
+    {
+      return (t < 20) ?  1518500249 : (t < 40) ?  1859775393 :
+             (t < 60) ? -1894007588 : -899497514;
+    }
+
+    /*
+     *  * Calculate the HMAC-SHA1 of a key and some data
+     *   */
+    function core_hmac_sha1(key, data)
+    {
+      var bkey = str2binb(key);
+      if(bkey.length > 16) bkey = core_sha1(bkey, key.length * chrsz);
+
+      var ipad = Array(16), opad = Array(16);
+      for(var i = 0; i < 16; i++)
+      {
+        ipad[i] = bkey[i] ^ 0x36363636;
+        opad[i] = bkey[i] ^ 0x5C5C5C5C;
+      }
+
+      var hash = core_sha1(ipad.concat(str2binb(data)), 512 + data.length * chrsz);
+      return core_sha1(opad.concat(hash), 512 + 160);
+    }
+
+    /*
+     *  * Add integers, wrapping at 2^32. This uses 16-bit operations internally
+     *   * to work around bugs in some JS interpreters.
+     *    */
+    function safe_add(x, y)
+    {
+      var lsw = (x & 0xFFFF) + (y & 0xFFFF);
+      var msw = (x >> 16) + (y >> 16) + (lsw >> 16);
+      return (msw << 16) | (lsw & 0xFFFF);
+    }
+
+    /*
+     *  * Bitwise rotate a 32-bit number to the left.
+     *   */
+    function rol(num, cnt)
+    {
+      return (num << cnt) | (num >>> (32 - cnt));
+    }
+
+    /*
+     *  * Convert an 8-bit or 16-bit string to an array of big-endian words
+     *   * In 8-bit function, characters >255 have their hi-byte silently ignored.
+     *    */
+    function str2binb(str)
+    {
+      var bin = Array();
+      var mask = (1 << chrsz) - 1;
+      for(var i = 0; i < str.length * chrsz; i += chrsz)
+        bin[i>>5] |= (str.charCodeAt(i / chrsz) & mask) << (24 - i%32);
+      return bin;
+    }
+
+    /*
+     *  * Convert an array of big-endian words to a string
+     *   */
+    function binb2str(bin)
+    {
+      var str = "";
+      var mask = (1 << chrsz) - 1;
+      for(var i = 0; i < bin.length * 32; i += chrsz)
+        str += String.fromCharCode((bin[i>>5] >>> (24 - i%32)) & mask);
+      return str;
+    }
+
+    /*
+     *  * Convert an array of big-endian words to a hex string.
+     *   */
+    function binb2hex(binarray)
+    {
+      var hex_tab = hexcase ? "0123456789ABCDEF" : "0123456789abcdef";
+      var str = "";
+      for(var i = 0; i < binarray.length * 4; i++)
+      {
+        str += hex_tab.charAt((binarray[i>>2] >> ((3 - i%4)*8+4)) & 0xF) +
+               hex_tab.charAt((binarray[i>>2] >> ((3 - i%4)*8  )) & 0xF);
+      }
+      return str;
+    }
+
+    /*
+     *  * Convert an array of big-endian words to a base-64 string
+     *   */
+    function binb2b64(binarray)
+    {
+      var tab = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+      var str = "";
+      for(var i = 0; i < binarray.length * 4; i += 3)
+      {
+        var triplet = (((binarray[i   >> 2] >> 8 * (3 -  i   %4)) & 0xFF) << 16)
+                    | (((binarray[i+1 >> 2] >> 8 * (3 - (i+1)%4)) & 0xFF) << 8 )
+                    |  ((binarray[i+2 >> 2] >> 8 * (3 - (i+2)%4)) & 0xFF);
+        for(var j = 0; j < 4; j++)
+        {
+          if(i * 8 + j * 6 > binarray.length * 32) str += b64pad;
+          else str += tab.charAt((triplet >> 6*(3-j)) & 0x3F);
+        }
+      }
+      return str;
+    }
+
+    /* Copyright (C) 1999 Masanao Izumo <mo@goice.co.jp>
+     *  * Version: 1.0
+     *   * LastModified: Dec 25 1999
+     *    * This library is free.  You can redistribute it and/or modify it.
+     *     */
+
+    /*
+     *  * Interfaces:
+     *   * b64 = base64encode(data);
+     *    * data = base64decode(b64);
+     *     */
+
+    var Base64 = {
+      EncodeChars: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
+      DecodeChars: new Array(
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, 63,
+        52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, -1, -1, -1,
+        -1,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14,
+        15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1,
+        -1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+        41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -1, -1, -1, -1
+      ),
+
+      encode: function(str) {
+        var out, i, len;
+        var c1, c2, c3;
+
+        len = str.length;
+        i = 0;
+        out = "";
+        while(i < len) {
+        c1 = str.charCodeAt(i++) & 0xff;
+        if(i == len)
+        {
+            out += Base64.EncodeChars.charAt(c1 >> 2);
+            out += Base64.EncodeChars.charAt((c1 & 0x3) << 4);
+            out += "==";
+            break;
+        }
+        c2 = str.charCodeAt(i++);
+        if(i == len)
+        {
+            out += Base64.EncodeChars.charAt(c1 >> 2);
+            out += Base64.EncodeChars.charAt(((c1 & 0x3)<< 4) | ((c2 & 0xF0) >> 4));
+            out += Base64.EncodeChars.charAt((c2 & 0xF) << 2);
+            out += "=";
+            break;
+        }
+        c3 = str.charCodeAt(i++);
+        out += Base64.EncodeChars.charAt(c1 >> 2);
+        out += Base64.EncodeChars.charAt(((c1 & 0x3)<< 4) | ((c2 & 0xF0) >> 4));
+        out += Base64.EncodeChars.charAt(((c2 & 0xF) << 2) | ((c3 & 0xC0) >>6));
+        out += Base64.EncodeChars.charAt(c3 & 0x3F);
+        }
+        return out;
+      },
+
+      decode: function(str) {
+        var c1, c2, c3, c4;
+        var i, len, out;
+
+        len = str.length;
+        i = 0;
+        out = "";
+        while(i < len) {
+        /* c1 */
+        do {
+            c1 = Base64.DecodeChars[str.charCodeAt(i++) & 0xff];
+        } while(i < len && c1 == -1);
+        if(c1 == -1)
+            break;
+
+        /* c2 */
+        do {
+            c2 = Base64.DecodeChars[str.charCodeAt(i++) & 0xff];
+        } while(i < len && c2 == -1);
+        if(c2 == -1)
+            break;
+
+        out += String.fromCharCode((c1 << 2) | ((c2 & 0x30) >> 4));
+
+        /* c3 */
+        do {
+            c3 = str.charCodeAt(i++) & 0xff;
+            if(c3 == 61)
+            return out;
+            c3 = Base64.DecodeChars[c3];
+        } while(i < len && c3 == -1);
+        if(c3 == -1)
+            break;
+
+        out += String.fromCharCode(((c2 & 0XF) << 4) | ((c3 & 0x3C) >> 2));
+
+        /* c4 */
+        do {
+            c4 = str.charCodeAt(i++) & 0xff;
+            if(c4 == 61)
+            return out;
+            c4 = Base64.DecodeChars[c4];
+        } while(i < len && c4 == -1);
+        if(c4 == -1)
+            break;
+        out += String.fromCharCode(((c3 & 0x03) << 6) | c4);
+        }
+        return out;
+      }
+    };
+
+    function Wsse(u, s, n, c)
+    {
+        this.set = function (u, s, n, c) {
+            this.setUser(u);
+            this.setSecret(s);
+            this.setNonce(n);
+            this.setCreated(c);
+        };
+
+        this.setUser = function (u) {
+            this.u = u;
+        };
+        this.setSecret = function (s) {
+            this.s = s;
+        };
+        this.setNonce = function (n) {
+            this.n = n;
+        };
+        this.setCreated = function (c) {
+            this.c = c;
+        };
+
+        this.generateNonce = function () {
+            var len = 24, chars  = "0123456789abcdef", nonce  = "";
+            for (var i = 0; i < len; i++) {
+                nonce += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return nonce;
+        };
+
+        this.generateCreated = function () {
+            var date = new Date(), y, m, d, h, i, s;
+            y = date.getUTCFullYear();
+            m = (date.getUTCMonth() + 1); if (m < 10) { m = "0" + m; }
+            d = (date.getUTCDate());      if (d < 10) { d = "0" + d; }
+            h = (date.getUTCHours());     if (h < 10) { h = "0" + h; }
+            i = (date.getUTCMinutes());   if (i < 10) { i = "0" + i; }
+            s = (date.getUTCSeconds());   if (s < 10) { s = "0" + s; }
+            return y + "-" + m + "-" + d + "T" + h + ":" + i + ":" + s + "Z";
+        };
+
+        this.encode = function () {
+            var p = {};
+            if (!window.b64_sha1) {
+                alert("b64_sha1() was not found");
+                return p;
+            }
+            p.u = this.u;
+            p.s = this.s;
+            p.n = (this.n ? this.n : this.generateNonce());
+            p.c = (this.c ? this.c : this.generateCreated());
+            p.d = b64_sha1(p.n + p.c + p.s);
+            p.n = Base64.encode(p.n);
+            return p;
+        };
+
+        this.generateRESTHeaders = function () {
+            rval = "";
+
+            var p = this.encode();
+
+            rval = "UsernameToken";
+            rval += " Username=\"" + p.u + "\",";
+            rval += " PasswordDigest=\"" + p.d + "\",";
+            rval += " Nonce=\"" + p.n + "\",";
+            rval += " Created=\"" + p.c + "\"";
+
+            return { 'X-WSSE': rval };
+        };
+
+        this.generateRESTQS = function () {
+            var p = this.encode(), rval = "";
+            rval  = "auth_digest="    + escape(p.d);
+            rval += "&auth_nonce="    + escape(p.n);
+            rval += "&auth_created="  + escape(p.c);
+            rval += "&auth_username=" + escape(p.u);
+            return rval;
+        };
+
+        this.generateSOAPHeaders = function () {
+            var p = this.encode(), rval = "";
+
+            rval  = "<wsse:Security wsse:mustUnderstand=\"1\" xmlns:wsse=\"http://www.omniture.com\">\n";
+            rval += "\t<wsse:UsernameToken wsse:Id=\"User\">\n";
+            rval += "\t\t<wsse:Username>" + p.u + "</wsse:Username>\n";
+            rval += "\t\t\t<wsse:Password Type=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordDigest\">" + p.d + "</wsse:Password>\n";
+            rval += "\t\t<wsse:Nonce>" + p.n + "</wsse:Nonce>\n";
+            rval += "\t\t<wsse:Created>" + p.c + "</wsse:Created>\n";
+            rval += "\t</wsse:UsernameToken>\n";
+            rval += "</wsse:Security>\n";
+
+            return rval;
+        };
+
+        /** Generate the auth credentials */
+        this.generateAuth = function (username, secret) {
+            var nonce = this.generateNonce();
+            var created = this.generateCreated();
+
+            this.set(username, secret, nonce, created);
+
+            var headers = this.generateRESTHeaders();
+            return headers;
+        };
+
+        this.set(u, s, n, c);
+    }
+    </script>
+    <script>
+      (function($) {
+        window.MarketingCloud = {
+          env:   {},
+          wsse:  new Wsse(),
+
+          /** Make the api request */
+          /* callback should follow standard jQuery request format:
+           *    function callback(data)
+           */
+          makeRequest: function (username, secret, method, params, endpoint, callback)
+          {
+              var headers = MarketingCloud.wsse.generateAuth(username, secret);
+              var url = 'https://'+endpoint+'/admin/1.4/rest/?method='+method;
+              $.ajax(url, {
+                  type:'POST',
+                  data: params,
+                  complete: callback,
+                  dataType: "text",
+                  cache: false,
+                  headers: {
+                      'X-WSSE': headers['X-WSSE']
+                  }
+              });
+          }
+        };
+      })(jQuery);
+    </script>
+    <!-- <script type="text/javascript" src="marketing_cloud.js"></script> -->
+
+        <style>
+            @media print {
+              .noprint {display:none !important;}
+              body {-webkit-print-color-adjust: exact;   min-width: 992px !important;}
+              @page
+             {
+                size: a4;
+             }
+            }
+            #hdtbl-1{
+              top: 0px !important;
+            }
+                table, th, td
+                {
+                    margin:10px 0;
+                    border:solid 1px #333;
+                    padding:2px 4px;
+                    font:15px Verdana;
+                }
+                th {
+                    font-weight:bold;
+                }
+
+                .container {
+                 margin-top:20px;
+                }
+
+
+            .starter-template {
+                margin: 0 auto;
+                width:50%;
+            }
+
+            td, th{
+                border: 1px solid #ddd;
+                padding: 8px;
+                width:25%;
+            }
+
+            td, th:first-child {
+                border: 1px solid #ddd;
+                padding: 8px;
+                width:12%;
+            }
+
+
+
+            tr:nth-child(even){background-color: #10798b1f;}
+
+            tr:hover {background-color: #ffffff;}
+
+            th {
+                padding-top: 12px;
+                padding-bottom: 12px;
+                text-align: left;
+                background-color: #117a8b;
+                color: white;
+            }
+            td .badge {
+                color: #fff;
+                background-color: #17a2b8;
+                border-radius: 10px;
+            }
+            #loader-wrapper {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: 1000;
+            }
+            #loader {
+                display: block;
+                position: relative;
+                left: 50%;
+                top: 50%;
+                width: 150px;
+                height: 150px;
+                margin: -75px 0 0 -75px;
+                border-radius: 50%;
+                border: 3px solid transparent;
+                border-top-color: #3498db;
+                -webkit-animation: spin 2s linear infinite; /* Chrome, Opera 15+, Safari 5+ */
+                animation: spin 2s linear infinite; /* Chrome, Firefox 16+, IE 10+, Opera */
+            }
+            /* Transparent Overlay */
+            #loader-wrapper:before {
+              content: '';
+              display: block;
+              position: fixed;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              background-color: #ffffff;
+              opacity: 0.1;
+              /*background: #e9e9e9;*/
+              /*background-color: rgba(0,0,0,0.3);*/
+            }
+            #loader:before {
+                content: "";
+                position: absolute;
+                top: 5px;
+                left: 5px;
+                right: 5px;
+                bottom: 5px;
+                border-radius: 50%;
+                border: 3px solid transparent;
+                border-top-color: #e74c3c;
+                -webkit-animation: spin 3s linear infinite; /* Chrome, Opera 15+, Safari 5+ */
+                  animation: spin 3s linear infinite; /* Chrome, Firefox 16+, IE 10+, Opera */
+            }
+
+            #loader:after {
+                content: "";
+                position: absolute;
+                top: 15px;
+                left: 15px;
+                right: 15px;
+                bottom: 15px;
+                border-radius: 50%;
+                border: 3px solid transparent;
+                border-top-color: #f9c922;
+                -webkit-animation: spin 1.5s linear infinite; /* Chrome, Opera 15+, Safari 5+ */
+                  animation: spin 1.5s linear infinite; /* Chrome, Firefox 16+, IE 10+, Opera */
+            }
+
+            @-webkit-keyframes spin {
+                0%   {
+                    -webkit-transform: rotate(0deg);  /* Chrome, Opera 15+, Safari 3.1+ */
+                    -ms-transform: rotate(0deg);  /* IE 9 */
+                    transform: rotate(0deg);  /* Firefox 16+, IE 10+, Opera */
+                }
+                100% {
+                    -webkit-transform: rotate(360deg);  /* Chrome, Opera 15+, Safari 3.1+ */
+                    -ms-transform: rotate(360deg);  /* IE 9 */
+                    transform: rotate(360deg);  /* Firefox 16+, IE 10+, Opera */
+                }
+            }
+            @keyframes spin {
+                0%   {
+                    -webkit-transform: rotate(0deg);  /* Chrome, Opera 15+, Safari 3.1+ */
+                    -ms-transform: rotate(0deg);  /* IE 9 */
+                    transform: rotate(0deg);  /* Firefox 16+, IE 10+, Opera */
+                }
+                100% {
+                    -webkit-transform: rotate(360deg);  /* Chrome, Opera 15+, Safari 3.1+ */
+                    -ms-transform: rotate(360deg);  /* IE 9 */
+                    transform: rotate(360deg);  /* Firefox 16+, IE 10+, Opera */
+                }
+            }
+
+            /* Add animation to "page content" */
+            .animate-bottom {
+              position: relative;
+              -webkit-animation-name: animatebottom;
+              -webkit-animation-duration: 1s;
+              animation-name: animatebottom;
+              animation-duration: 1s
+            }
+
+            @-webkit-keyframes animatebottom {
+              from { bottom:-100px; opacity:0 }
+              to { bottom:0px; opacity:1 }
+            }
+
+            @keyframes animatebottom {
+              from{ bottom:-100px; opacity:0 }
+              to{ bottom:0; opacity:1 }
+            }
+            .ui-autocomplete {
+              max-height: 500px;
+          		overflow-y: auto;
+          		/* prevent horizontal scrollbar */
+          		overflow-x: hidden;
+              position: absolute;
+              top: 100%;
+              left: 0;
+              z-index: 1000;
+              display: none;
+              float: left;
+              min-width: 160px;
+              padding: 5px 0;
+              margin: 2px 0 0;
+              list-style: none;
+              font-size: 14px;
+              text-align: left;
+              background-color: #ffffff;
+              border: 1px solid #cccccc;
+              border: 1px solid rgba(0, 0, 0, 0.15);
+              border-radius: 4px;
+              -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+              box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+              background-clip: padding-box;
+            }
+
+            .ui-autocomplete > li > div {
+              display: block;
+              padding: 3px 20px;
+              clear: both;
+              font-weight: normal;
+              line-height: 1.42857143;
+              color: #333333;
+              white-space: nowrap;
+            }
+
+            .ui-state-hover,
+            .ui-state-active,
+            .ui-state-focus {
+              text-decoration: none;
+              color: #262626;
+              background-color: #f5f5f5;
+              cursor: pointer;
+            }
+
+            .ui-helper-hidden-accessible {
+              border: 0;
+              clip: rect(0 0 0 0);
+              height: 1px;
+              margin: -1px;
+              overflow: hidden;
+              padding: 0;
+              position: absolute;
+              width: 1px;
+            }
+
+        </style>
+
+</head>
+<body>
+
+  <script>
+
+
+
+  </script>
+
+  <div id="right-panel" class="right-panel">
+    <header>
+        <nav class="navbar navbar-light" style="background-color: #003c71;">
+          <b style="color: #ffffff;">Real Time SDR</b>
+        </nav>
+    </header>
+
+    <div class="content mt-4">
+        <main role="main" class="container-fluid">
+            <div class="starter-template noprint">
+
+              <form>
+                <div class="form-group">
+                  <label for="exampleFormControlSelect1"><b>Select Company:</b></label>
+                  <select class="form-control" id="selectCompany">
+                    <option>UnitedHealthGroup</option>
+                    <option>UnitedHealthcareServices</option>
+                    <option>OptumRX</option>
+                  </select>
+                </div>
+                <div class="form-group">
+
+                    <!-- <label for="rsidName"><b>Enter Report suites:</b></label> -->
+                    <div class="ui-widget">
+                      <label for="tags"><b>Select Report suites:</b></label>
+                      <input type="text" size="70" name="rsidName" class="form-control" id="tags" value="" />
+                    </div>
+
+                </div>
+                <input type="button" class="btn btn-primary" onclick="getEvars()"  value="Get Evars" />
+                <input type="button" class="btn btn-info" onclick="getProps()" value="Get Props" />
+                <input type="button" class="btn btn-success" onclick="getEvents()" value="Get Events" />
+
+              </form>
+            </div>
+             <hr class="noprint">
+            <div class="row">
+                <div class="col">
+                </div>
+                <div class="col">
+                  <center><h2 id='header2'></h2></center>
+                </div>
+                <div class="col">
+                    <div id='print' style="display: none;"><a type="btn" class="btn btn-outline-primary noprint float-right" href="javascript:window.print()">Print</a></div>
+                </div>
+            </div>
+            <div id="showData"></div>
+        </main>
+          <!--/.col-->
+    </div> <!-- .content -->
+  </div><!-- /#right-panel -->
+
+  <script type="text/javascript">
+
+  onunload = function()
+{
+	var foo = document.getElementById('selectCompany');
+	self.name = 'fooidx' + foo.selectedIndex;
+}
+
+onload = function()
+{
+	var idx, foo = document.getElementById('selectCompany');
+	foo.selectedIndex = (idx = self.name.split('fooidx')) ?	idx[1] : 0;
+}
+  $("#selectCompany").change(function(){
+   var val = $(this).val(); // This should be the new CurrencyCode, extracted from a select box
+   var pag = window.location.pathname;
+   var url = window.location.search;
+       url = url.replace("?", "").split("&"); // Clean up the URL, and create an array with each query parameter
+
+   var n = 0;
+   for (var count = 0; count < url.length; count++) {
+       if (!url[count].indexOf("selectedCompany")) { // Figure out if if/where the Currency is set in the array, then break out
+           n = count;
+           break;
+       }
+   }
+
+   if (n !=0) {
+      url.splice(n,1); // If the Currency was set, remove it from the array
+   }
+
+   var len = url.length;
+   var newUrl = url.join("&"); // Restringify the array
+
+   if (len > 0) { // Check whether or not the currency is the only parameter, then build new URL with ? or &
+      newUrl = pag + "?" + newUrl + "&selectedCompany=" + val;
+   } else {
+      newUrl = pag + newUrl + "?selectedCompany=" + val;
+   }
+
+   window.location.href = newUrl; // Finished, let's go!
+});
+function getUrlVars()
+{
+  var vars = [], hash;
+  var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+  for(var i = 0; i < hashes.length; i++)
+  {
+      hash = hashes[i].split('=');
+      vars.push(hash[0]);
+      vars[hash[0]] = hash[1];
+  }
+  return vars;
+}
+      var companyVal = getUrlVars()["selectedCompany"];
+      if (companyVal == 'UnitedHealthcareServices') {
+        var username = "vijay.bathula@uhc.com:United Healthcare Services";
+        var secret = "e5a6bc2d11f6d20ea593ad7d911d8462";
+      }else if (companyVal == 'OptumRX') {
+        var username = "scott.aronson@optum.com:OptumRX";
+        var secret = "13b36a88fb691f21357a5d3cb72fa2ab";
+      }else{
+       var username = "vbathul2:United Health Group";
+       var secret = "573b6e10c243e6dca5bb8fb4f492b198";
+     }
+     console.log('company', companyVal)
+      var endpoint = "api.omniture.com";
+      var reportID = "";
+      var iFrequency = 5000; // expressed in miliseconds
+      var myInterval = 0;
+      var reportID = "";
+
+      // STARTS and Resets the loop if any
+      function startLoop() {
+          if (myInterval > 0) clearInterval(myInterval);  // stop
+          myInterval = setInterval("GetReport()", iFrequency);  // run
+      }
+
+      function GetReport() {
+          if (reportID > 0) {
+              getAPIResponse();
+          }
+      }
+
+      $(document).ready(function (e) {
+
+        getReportSuites('Company.GetReportSuites', 'notneeded');
+
+      });
+
+      function getReportSuites(varMethod, rsidName) {
+        var divContainer = document.getElementById("showData");
+        divContainer.innerHTML = '<div id="loader-wrapper"><div id="loader"></div></div>';
+          var valueInserted = rsidName;
+          var rsids = valueInserted ? valueInserted.split(",") : valueInserted;
+          var method = varMethod;
+          var params = {
+              "rsid_list": rsids
+          };
+          var rsData = [];
+          MarketingCloud.makeRequest(username, secret, method, params, endpoint, function (response) {
+              var responseText = response.responseText;
+              var responseObject = JSON.parse(responseText);
+              var dataSuites = responseObject.report_suites;
+              divContainer.innerHTML = "";
+              $.each(responseObject['report_suites'], function( key, val ) {
+                rsData.push(val.rsid);
+              });
+          });
+          setTimeout(startLoop, 8000);
+
+          function split( val ) {
+            return val.split( /,\s*/ );
+          }
+          function extractLast( term ) {
+            return split( term ).pop();
+          }
+
+          $( "#tags" )
+            // don't navigate away from the field on tab when selecting an item
+            .on( "keydown", function( event ) {
+              if ( event.keyCode === $.ui.keyCode.TAB &&
+                  $( this ).autocomplete( "instance" ).menu.active ) {
+                event.preventDefault();
+              }
+            })
+            .autocomplete({
+              minLength: 0,
+              source: function( request, response ) {
+                // delegate back to autocomplete, but extract the last term
+                response( $.ui.autocomplete.filter(
+                  rsData, extractLast( request.term ) ) );
+              },
+              focus: function() {
+                // prevent value inserted on focus
+                return false;
+              },
+              select: function( event, ui ) {
+                var terms = split( this.value );
+                // remove the current input
+                terms.pop();
+                // add the selected item
+                terms.push( ui.item.value );
+                // add placeholder to get the comma-and-space at the end
+                terms.push( "" );
+                this.value = terms.join( ", " );
+                return false;
+              }
+            });
+      };
+  </script>
+
+<script>
+  // $( function() {
+  //
+  // } );
+  </script>
+
+
+
+<!--###### -->
+    <script type="text/javascript">
+      var getQueryString = function ( field, url ) {
+        var href = window.location.href;
+        var reg = new RegExp( '[?&]' + field + '=([^&#]*)', 'i' );
+        var string = reg.exec(href);
+        return string ? string[1] : null;
+      };
+      var companyVal = document.getElementById('selectCompany').value
+      if (companyVal == 'united health group'){
+       var username = "vbathul2:United Health Group";
+       var secret = "573b6e10c243e6dca5bb8fb4f492b198";
+     }else if (companyVal == 'united healthcare services') {
+       var username = "vijay.bathula@uhc.com:United Healthcare Services";
+       var secret = "e5a6bc2d11f6d20ea593ad7d911d8462";
+     }
+
+       var endpoint = "api.omniture.com";
+           var reportID = "";
+      var iFrequency = 5000; // expressed in miliseconds
+       var myInterval = 0;
+       var reportID="";
+
+       // STARTS and Resets the loop if any
+       function startLoop() {
+           if(myInterval > 0) clearInterval(myInterval);  // stop
+           myInterval = setInterval( "GetReport()", iFrequency );  // run
+       }
+
+       function GetReport(){
+           if (reportID > 0 )
+           {
+               getAPIResponse();
+           }
+       }
+
+   var evarsID =[{"id":"evar1"},{"id":"evar2"},{"id":"evar3"},{"id":"evar4"},{"id":"evar5"},{"id":"evar6"},{"id":"evar7"},{"id":"evar8"},{"id":"evar9"},{"id":"evar10"},{"id":"evar11"},{"id":"evar12"},{"id":"evar13"},{"id":"evar14"},{"id":"evar15"},{"id":"evar16"},{"id":"evar17"},{"id":"evar18"},{"id":"evar19"},{"id":"evar20"},{"id":"evar21"},{"id":"evar22"},{"id":"evar23"},{"id":"evar24"},{"id":"evar25"},{"id":"evar26"},{"id":"evar27"},{"id":"evar28"},{"id":"evar29"},{"id":"evar30"},{"id":"evar31"},{"id":"evar32"},{"id":"evar33"},{"id":"evar34"},{"id":"evar35"},{"id":"evar36"},{"id":"evar37"},{"id":"evar38"},{"id":"evar39"},{"id":"evar40"},{"id":"evar41"},{"id":"evar42"},{"id":"evar43"},{"id":"evar44"},{"id":"evar45"},{"id":"evar46"},{"id":"evar47"},{"id":"evar48"},{"id":"evar49"},{"id":"evar50"},{"id":"evar51"},{"id":"evar52"},{"id":"evar53"},{"id":"evar54"},{"id":"evar55"},{"id":"evar56"},{"id":"evar57"},{"id":"evar58"},{"id":"evar59"},{"id":"evar60"},{"id":"evar61"},{"id":"evar62"},{"id":"evar63"},{"id":"evar64"},{"id":"evar65"},{"id":"evar66"},{"id":"evar67"},{"id":"evar68"},{"id":"evar69"},{"id":"evar70"},{"id":"evar71"},{"id":"evar72"},{"id":"evar73"},{"id":"evar74"},{"id":"evar75"},{"id":"evar76"},{"id":"evar77"},{"id":"evar78"},{"id":"evar79"},{"id":"evar80"},{"id":"evar81"},{"id":"evar82"},{"id":"evar83"},{"id":"evar84"},{"id":"evar85"},{"id":"evar86"},{"id":"evar87"},{"id":"evar88"},{"id":"evar89"},{"id":"evar90"},{"id":"evar91"},{"id":"evar92"},{"id":"evar93"},{"id":"evar94"},{"id":"evar95"},{"id":"evar96"},{"id":"evar97"},{"id":"evar98"},{"id":"evar99"},{"id":"evar100"},{"id":"evar101"},{"id":"evar102"},{"id":"evar103"},{"id":"evar104"},{"id":"evar105"},{"id":"evar106"},{"id":"evar107"},{"id":"evar108"},{"id":"evar109"},{"id":"evar110"},{"id":"evar111"},{"id":"evar112"},{"id":"evar113"},{"id":"evar114"},{"id":"evar115"},{"id":"evar116"},{"id":"evar117"},{"id":"evar118"},{"id":"evar119"},{"id":"evar120"},{"id":"evar121"},{"id":"evar122"},{"id":"evar123"},{"id":"evar124"},{"id":"evar125"},{"id":"evar126"},{"id":"evar127"},{"id":"evar128"},{"id":"evar129"},{"id":"evar130"},{"id":"evar131"},{"id":"evar132"},{"id":"evar133"},{"id":"evar134"},{"id":"evar135"},{"id":"evar136"},{"id":"evar137"},{"id":"evar138"},{"id":"evar139"},{"id":"evar140"},{"id":"evar141"},{"id":"evar142"},{"id":"evar143"},{"id":"evar144"},{"id":"evar145"},{"id":"evar146"},{"id":"evar147"},{"id":"evar148"},{"id":"evar149"},{"id":"evar150"},{"id":"evar151"},{"id":"evar152"},{"id":"evar153"},{"id":"evar154"},{"id":"evar155"},{"id":"evar156"},{"id":"evar157"},{"id":"evar158"},{"id":"evar159"},{"id":"evar160"},{"id":"evar161"},{"id":"evar162"},{"id":"evar163"},{"id":"evar164"},{"id":"evar165"},{"id":"evar166"},{"id":"evar167"},{"id":"evar168"},{"id":"evar169"},{"id":"evar170"},{"id":"evar171"},{"id":"evar172"},{"id":"evar173"},{"id":"evar174"},{"id":"evar175"},{"id":"evar176"},{"id":"evar177"},{"id":"evar178"},{"id":"evar179"},{"id":"evar180"},{"id":"evar181"},{"id":"evar182"},{"id":"evar183"},{"id":"evar184"},{"id":"evar185"},{"id":"evar186"},{"id":"evar187"},{"id":"evar188"},{"id":"evar189"},{"id":"evar190"},{"id":"evar191"},{"id":"evar192"},{"id":"evar193"},{"id":"evar194"},{"id":"evar195"},{"id":"evar196"},{"id":"evar197"},{"id":"evar198"},{"id":"evar199"},{"id":"evar200"},{"id":"evar201"},{"id":"evar202"},{"id":"evar203"},{"id":"evar204"},{"id":"evar205"},{"id":"evar206"},{"id":"evar207"},{"id":"evar208"},{"id":"evar209"},{"id":"evar210"},{"id":"evar211"},{"id":"evar212"},{"id":"evar213"},{"id":"evar214"},{"id":"evar215"},{"id":"evar216"},{"id":"evar217"},{"id":"evar218"},{"id":"evar219"},{"id":"evar220"},{"id":"evar221"},{"id":"evar222"},{"id":"evar223"},{"id":"evar224"},{"id":"evar225"},{"id":"evar226"},{"id":"evar227"},{"id":"evar228"},{"id":"evar229"},{"id":"evar230"},{"id":"evar231"},{"id":"evar232"},{"id":"evar233"},{"id":"evar234"},{"id":"evar235"},{"id":"evar236"},{"id":"evar237"},{"id":"evar238"},{"id":"evar239"},{"id":"evar240"},{"id":"evar241"},{"id":"evar242"},{"id":"evar243"},{"id":"evar244"},{"id":"evar245"},{"id":"evar246"},{"id":"evar247"},{"id":"evar248"},{"id":"evar249"},{"id":"evar250"}]
+
+       var propsID = [{"id":"prop1"},{"id":"prop2"},{"id":"prop3"},{"id":"prop4"},{"id":"prop5"},{"id":"prop6"},{"id":"prop7"},{"id":"prop8"},{"id":"prop9"},{"id":"prop10"},{"id":"prop11"},{"id":"prop12"},{"id":"prop13"},{"id":"prop14"},{"id":"prop15"},{"id":"prop16"},{"id":"prop17"},{"id":"prop18"},{"id":"prop19"},{"id":"prop20"},{"id":"prop21"},{"id":"prop22"},{"id":"prop23"},{"id":"prop24"},{"id":"prop25"},{"id":"prop26"},{"id":"prop27"},{"id":"prop28"},{"id":"prop29"},{"id":"prop30"},{"id":"prop31"},{"id":"prop32"},{"id":"prop33"},{"id":"prop34"},{"id":"prop35"},{"id":"prop36"},{"id":"prop37"},{"id":"prop38"},{"id":"prop39"},{"id":"prop40"},{"id":"prop41"},{"id":"prop42"},{"id":"prop43"},{"id":"prop44"},{"id":"prop45"},{"id":"prop46"},{"id":"prop47"},{"id":"prop48"},{"id":"prop49"},{"id":"prop50"},{"id":"prop51"},{"id":"prop52"},{"id":"prop53"},{"id":"prop54"},{"id":"prop55"},{"id":"prop56"},{"id":"prop57"},{"id":"prop58"},{"id":"prop59"},{"id":"prop60"},{"id":"prop61"},{"id":"prop62"},{"id":"prop63"},{"id":"prop64"},{"id":"prop65"},{"id":"prop66"},{"id":"prop67"},{"id":"prop68"},{"id":"prop69"},{"id":"prop70"},{"id":"prop71"},{"id":"prop72"},{"id":"prop73"},{"id":"prop74"},{"id":"prop75"}]
+
+       var events = [{"id":"event1"},{"id":"event2"},{"id":"event3"},{"id":"event4"},{"id":"event5"},{"id":"event6"},{"id":"event7"},{"id":"event8"},{"id":"event9"},{"id":"event10"},{"id":"event11"},{"id":"event12"},{"id":"event13"},{"id":"event14"},{"id":"event15"},{"id":"event16"},{"id":"event17"},{"id":"event18"},{"id":"event19"},{"id":"event20"},{"id":"event21"},{"id":"event22"},{"id":"event23"},{"id":"event24"},{"id":"event25"},{"id":"event26"},{"id":"event27"},{"id":"event28"},{"id":"event29"},{"id":"event30"},{"id":"event31"},{"id":"event32"},{"id":"event33"},{"id":"event34"},{"id":"event35"},{"id":"event36"},{"id":"event37"},{"id":"event38"},{"id":"event39"},{"id":"event40"},{"id":"event41"},{"id":"event42"},{"id":"event43"},{"id":"event44"},{"id":"event45"},{"id":"event46"},{"id":"event47"},{"id":"event48"},{"id":"event49"},{"id":"event50"},{"id":"event51"},{"id":"event52"},{"id":"event53"},{"id":"event54"},{"id":"event55"},{"id":"event56"},{"id":"event57"},{"id":"event58"},{"id":"event59"},{"id":"event60"},{"id":"event61"},{"id":"event62"},{"id":"event63"},{"id":"event64"},{"id":"event65"},{"id":"event66"},{"id":"event67"},{"id":"event68"},{"id":"event69"},{"id":"event70"},{"id":"event71"},{"id":"event72"},{"id":"event73"},{"id":"event74"},{"id":"event75"},{"id":"event76"},{"id":"event77"},{"id":"event78"},{"id":"event79"},{"id":"event80"},{"id":"event81"},{"id":"event82"},{"id":"event83"},{"id":"event84"},{"id":"event85"},{"id":"event86"},{"id":"event87"},{"id":"event88"},{"id":"event89"},{"id":"event90"},{"id":"event91"},{"id":"event92"},{"id":"event93"},{"id":"event94"},{"id":"event95"},{"id":"event96"},{"id":"event97"},{"id":"event98"},{"id":"event99"},{"id":"event100"},{"id":"event101"},{"id":"event102"},{"id":"event103"},{"id":"event104"},{"id":"event105"},{"id":"event106"},{"id":"event107"},{"id":"event108"},{"id":"event109"},{"id":"event110"},{"id":"event111"},{"id":"event112"},{"id":"event113"},{"id":"event114"},{"id":"event115"},{"id":"event116"},{"id":"event117"},{"id":"event118"},{"id":"event119"},{"id":"event120"},{"id":"event121"},{"id":"event122"},{"id":"event123"},{"id":"event124"},{"id":"event125"},{"id":"event126"},{"id":"event127"},{"id":"event128"},{"id":"event129"},{"id":"event130"},{"id":"event131"},{"id":"event132"},{"id":"event133"},{"id":"event134"},{"id":"event135"},{"id":"event136"},{"id":"event137"},{"id":"event138"},{"id":"event139"},{"id":"event140"},{"id":"event141"},{"id":"event142"},{"id":"event143"},{"id":"event144"},{"id":"event145"},{"id":"event146"},{"id":"event147"},{"id":"event148"},{"id":"event149"},{"id":"event150"},{"id":"event151"},{"id":"event152"},{"id":"event153"},{"id":"event154"},{"id":"event155"},{"id":"event156"},{"id":"event157"},{"id":"event158"},{"id":"event159"},{"id":"event160"},{"id":"event161"},{"id":"event162"},{"id":"event163"},{"id":"event164"},{"id":"event165"},{"id":"event166"},{"id":"event167"},{"id":"event168"},{"id":"event169"},{"id":"event170"},{"id":"event171"},{"id":"event172"},{"id":"event173"},{"id":"event174"},{"id":"event175"},{"id":"event176"},{"id":"event177"},{"id":"event178"},{"id":"event179"},{"id":"event180"},{"id":"event181"},{"id":"event182"},{"id":"event183"},{"id":"event184"},{"id":"event185"},{"id":"event186"},{"id":"event187"},{"id":"event188"},{"id":"event189"},{"id":"event190"},{"id":"event191"},{"id":"event192"},{"id":"event193"},{"id":"event194"},{"id":"event195"},{"id":"event196"},{"id":"event197"},{"id":"event198"},{"id":"event199"},{"id":"event200"},{"id":"event201"},{"id":"event202"},{"id":"event203"},{"id":"event204"},{"id":"event205"},{"id":"event206"},{"id":"event207"},{"id":"event208"},{"id":"event209"},{"id":"event210"},{"id":"event211"},{"id":"event212"},{"id":"event213"},{"id":"event214"},{"id":"event215"},{"id":"event216"},{"id":"event217"},{"id":"event218"},{"id":"event219"},{"id":"event220"},{"id":"event221"},{"id":"event222"},{"id":"event223"},{"id":"event224"},{"id":"event225"},{"id":"event226"},{"id":"event227"},{"id":"event228"},{"id":"event229"},{"id":"event230"},{"id":"event231"},{"id":"event232"},{"id":"event233"},{"id":"event234"},{"id":"event235"},{"id":"event236"},{"id":"event237"},{"id":"event238"},{"id":"event239"},{"id":"event240"},{"id":"event241"},{"id":"event242"},{"id":"event243"},{"id":"event244"},{"id":"event245"},{"id":"event246"},{"id":"event247"},{"id":"event248"},{"id":"event249"},{"id":"event250"},{"id":"event251"},{"id":"event252"},{"id":"event253"},{"id":"event254"},{"id":"event255"},{"id":"event256"},{"id":"event257"},{"id":"event258"},{"id":"event259"},{"id":"event260"},{"id":"event261"},{"id":"event262"},{"id":"event263"},{"id":"event264"},{"id":"event265"},{"id":"event266"},{"id":"event267"},{"id":"event268"},{"id":"event269"},{"id":"event270"},{"id":"event271"},{"id":"event272"},{"id":"event273"},{"id":"event274"},{"id":"event275"},{"id":"event276"},{"id":"event277"},{"id":"event278"},{"id":"event279"},{"id":"event280"},{"id":"event281"},{"id":"event282"},{"id":"event283"},{"id":"event284"},{"id":"event285"},{"id":"event286"},{"id":"event287"},{"id":"event288"},{"id":"event289"},{"id":"event290"},{"id":"event291"},{"id":"event292"},{"id":"event293"},{"id":"event294"},{"id":"event295"},{"id":"event296"},{"id":"event297"},{"id":"event298"},{"id":"event299"},{"id":"event300"},{"id":"event301"},{"id":"event302"},{"id":"event303"},{"id":"event304"},{"id":"event305"},{"id":"event306"},{"id":"event307"},{"id":"event308"},{"id":"event309"},{"id":"event310"},{"id":"event311"},{"id":"event312"},{"id":"event313"},{"id":"event314"},{"id":"event315"},{"id":"event316"},{"id":"event317"},{"id":"event318"},{"id":"event319"},{"id":"event320"},{"id":"event321"},{"id":"event322"},{"id":"event323"},{"id":"event324"},{"id":"event325"},{"id":"event326"},{"id":"event327"},{"id":"event328"},{"id":"event329"},{"id":"event330"},{"id":"event331"},{"id":"event332"},{"id":"event333"},{"id":"event334"},{"id":"event335"},{"id":"event336"},{"id":"event337"},{"id":"event338"},{"id":"event339"},{"id":"event340"},{"id":"event341"},{"id":"event342"},{"id":"event343"},{"id":"event344"},{"id":"event345"},{"id":"event346"},{"id":"event347"},{"id":"event348"},{"id":"event349"},{"id":"event350"},{"id":"event351"},{"id":"event352"},{"id":"event353"},{"id":"event354"},{"id":"event355"},{"id":"event356"},{"id":"event357"},{"id":"event358"},{"id":"event359"},{"id":"event360"},{"id":"event361"},{"id":"event362"},{"id":"event363"},{"id":"event364"},{"id":"event365"},{"id":"event366"},{"id":"event367"},{"id":"event368"},{"id":"event369"},{"id":"event370"},{"id":"event371"},{"id":"event372"},{"id":"event373"},{"id":"event374"},{"id":"event375"},{"id":"event376"},{"id":"event377"},{"id":"event378"},{"id":"event379"},{"id":"event380"},{"id":"event381"},{"id":"event382"},{"id":"event383"},{"id":"event384"},{"id":"event385"},{"id":"event386"},{"id":"event387"},{"id":"event388"},{"id":"event389"},{"id":"event390"},{"id":"event391"},{"id":"event392"},{"id":"event393"},{"id":"event394"},{"id":"event395"},{"id":"event396"},{"id":"event397"},{"id":"event398"},{"id":"event399"},{"id":"event400"},{"id":"event401"},{"id":"event402"},{"id":"event403"},{"id":"event404"},{"id":"event405"},{"id":"event406"},{"id":"event407"},{"id":"event408"},{"id":"event409"},{"id":"event410"},{"id":"event411"},{"id":"event412"},{"id":"event413"},{"id":"event414"},{"id":"event415"},{"id":"event416"},{"id":"event417"},{"id":"event418"},{"id":"event419"},{"id":"event420"},{"id":"event421"},{"id":"event422"},{"id":"event423"},{"id":"event424"},{"id":"event425"},{"id":"event426"},{"id":"event427"},{"id":"event428"},{"id":"event429"},{"id":"event430"},{"id":"event431"},{"id":"event432"},{"id":"event433"},{"id":"event434"},{"id":"event435"},{"id":"event436"},{"id":"event437"},{"id":"event438"},{"id":"event439"},{"id":"event440"},{"id":"event441"},{"id":"event442"},{"id":"event443"},{"id":"event444"},{"id":"event445"},{"id":"event446"},{"id":"event447"},{"id":"event448"},{"id":"event449"},{"id":"event450"},{"id":"event451"},{"id":"event452"},{"id":"event453"},{"id":"event454"},{"id":"event455"},{"id":"event456"},{"id":"event457"},{"id":"event458"},{"id":"event459"},{"id":"event460"},{"id":"event461"},{"id":"event462"},{"id":"event463"},{"id":"event464"},{"id":"event465"},{"id":"event466"},{"id":"event467"},{"id":"event468"},{"id":"event469"},{"id":"event470"},{"id":"event471"},{"id":"event472"},{"id":"event473"},{"id":"event474"},{"id":"event475"},{"id":"event476"},{"id":"event477"},{"id":"event478"},{"id":"event479"},{"id":"event480"},{"id":"event481"},{"id":"event482"},{"id":"event483"},{"id":"event484"},{"id":"event485"},{"id":"event486"},{"id":"event487"},{"id":"event488"},{"id":"event489"},{"id":"event490"},{"id":"event491"},{"id":"event492"},{"id":"event493"},{"id":"event494"},{"id":"event495"},{"id":"event496"},{"id":"event497"},{"id":"event498"},{"id":"event499"},{"id":"event500"},{"id":"event501"},{"id":"event502"},{"id":"event503"},{"id":"event504"},{"id":"event505"},{"id":"event506"},{"id":"event507"},{"id":"event508"},{"id":"event509"},{"id":"event510"},{"id":"event511"},{"id":"event512"},{"id":"event513"},{"id":"event514"},{"id":"event515"},{"id":"event516"},{"id":"event517"},{"id":"event518"},{"id":"event519"},{"id":"event520"},{"id":"event521"},{"id":"event522"},{"id":"event523"},{"id":"event524"},{"id":"event525"},{"id":"event526"},{"id":"event527"},{"id":"event528"},{"id":"event529"},{"id":"event530"},{"id":"event531"},{"id":"event532"},{"id":"event533"},{"id":"event534"},{"id":"event535"},{"id":"event536"},{"id":"event537"},{"id":"event538"},{"id":"event539"},{"id":"event540"},{"id":"event541"},{"id":"event542"},{"id":"event543"},{"id":"event544"},{"id":"event545"},{"id":"event546"},{"id":"event547"},{"id":"event548"},{"id":"event549"},{"id":"event550"},{"id":"event551"},{"id":"event552"},{"id":"event553"},{"id":"event554"},{"id":"event555"},{"id":"event556"},{"id":"event557"},{"id":"event558"},{"id":"event559"},{"id":"event560"},{"id":"event561"},{"id":"event562"},{"id":"event563"},{"id":"event564"},{"id":"event565"},{"id":"event566"},{"id":"event567"},{"id":"event568"},{"id":"event569"},{"id":"event570"},{"id":"event571"},{"id":"event572"},{"id":"event573"},{"id":"event574"},{"id":"event575"},{"id":"event576"},{"id":"event577"},{"id":"event578"},{"id":"event579"},{"id":"event580"},{"id":"event581"},{"id":"event582"},{"id":"event583"},{"id":"event584"},{"id":"event585"},{"id":"event586"},{"id":"event587"},{"id":"event588"},{"id":"event589"},{"id":"event590"},{"id":"event591"},{"id":"event592"},{"id":"event593"},{"id":"event594"},{"id":"event595"},{"id":"event596"},{"id":"event597"},{"id":"event598"},{"id":"event599"},{"id":"event600"},{"id":"event601"},{"id":"event602"},{"id":"event603"},{"id":"event604"},{"id":"event605"},{"id":"event606"},{"id":"event607"},{"id":"event608"},{"id":"event609"},{"id":"event610"},{"id":"event611"},{"id":"event612"},{"id":"event613"},{"id":"event614"},{"id":"event615"},{"id":"event616"},{"id":"event617"},{"id":"event618"},{"id":"event619"},{"id":"event620"},{"id":"event621"},{"id":"event622"},{"id":"event623"},{"id":"event624"},{"id":"event625"},{"id":"event626"},{"id":"event627"},{"id":"event628"},{"id":"event629"},{"id":"event630"},{"id":"event631"},{"id":"event632"},{"id":"event633"},{"id":"event634"},{"id":"event635"},{"id":"event636"},{"id":"event637"},{"id":"event638"},{"id":"event639"},{"id":"event640"},{"id":"event641"},{"id":"event642"},{"id":"event643"},{"id":"event644"},{"id":"event645"},{"id":"event646"},{"id":"event647"},{"id":"event648"},{"id":"event649"},{"id":"event650"},{"id":"event651"},{"id":"event652"},{"id":"event653"},{"id":"event654"},{"id":"event655"},{"id":"event656"},{"id":"event657"},{"id":"event658"},{"id":"event659"},{"id":"event660"},{"id":"event661"},{"id":"event662"},{"id":"event663"},{"id":"event664"},{"id":"event665"},{"id":"event666"},{"id":"event667"},{"id":"event668"},{"id":"event669"},{"id":"event670"},{"id":"event671"},{"id":"event672"},{"id":"event673"},{"id":"event674"},{"id":"event675"},{"id":"event676"},{"id":"event677"},{"id":"event678"},{"id":"event679"},{"id":"event680"},{"id":"event681"},{"id":"event682"},{"id":"event683"},{"id":"event684"},{"id":"event685"},{"id":"event686"},{"id":"event687"},{"id":"event688"},{"id":"event689"},{"id":"event690"},{"id":"event691"},{"id":"event692"},{"id":"event693"},{"id":"event694"},{"id":"event695"},{"id":"event696"},{"id":"event697"},{"id":"event698"},{"id":"event699"},{"id":"event700"},{"id":"event701"},{"id":"event702"},{"id":"event703"},{"id":"event704"},{"id":"event705"},{"id":"event706"},{"id":"event707"},{"id":"event708"},{"id":"event709"},{"id":"event710"},{"id":"event711"},{"id":"event712"},{"id":"event713"},{"id":"event714"},{"id":"event715"},{"id":"event716"},{"id":"event717"},{"id":"event718"},{"id":"event719"},{"id":"event720"},{"id":"event721"},{"id":"event722"},{"id":"event723"},{"id":"event724"},{"id":"event725"},{"id":"event726"},{"id":"event727"},{"id":"event728"},{"id":"event729"},{"id":"event730"},{"id":"event731"},{"id":"event732"},{"id":"event733"},{"id":"event734"},{"id":"event735"},{"id":"event736"},{"id":"event737"},{"id":"event738"},{"id":"event739"},{"id":"event740"},{"id":"event741"},{"id":"event742"},{"id":"event743"},{"id":"event744"},{"id":"event745"},{"id":"event746"},{"id":"event747"},{"id":"event748"},{"id":"event749"},{"id":"event750"},{"id":"event751"},{"id":"event752"},{"id":"event753"},{"id":"event754"},{"id":"event755"},{"id":"event756"},{"id":"event757"},{"id":"event758"},{"id":"event759"},{"id":"event760"},{"id":"event761"},{"id":"event762"},{"id":"event763"},{"id":"event764"},{"id":"event765"},{"id":"event766"},{"id":"event767"},{"id":"event768"},{"id":"event769"},{"id":"event770"},{"id":"event771"},{"id":"event772"},{"id":"event773"},{"id":"event774"},{"id":"event775"},{"id":"event776"},{"id":"event777"},{"id":"event778"},{"id":"event779"},{"id":"event780"},{"id":"event781"},{"id":"event782"},{"id":"event783"},{"id":"event784"},{"id":"event785"},{"id":"event786"},{"id":"event787"},{"id":"event788"},{"id":"event789"},{"id":"event790"},{"id":"event791"},{"id":"event792"},{"id":"event793"},{"id":"event794"},{"id":"event795"},{"id":"event796"},{"id":"event797"},{"id":"event798"},{"id":"event799"},{"id":"event800"},{"id":"event801"},{"id":"event802"},{"id":"event803"},{"id":"event804"},{"id":"event805"},{"id":"event806"},{"id":"event807"},{"id":"event808"},{"id":"event809"},{"id":"event810"},{"id":"event811"},{"id":"event812"},{"id":"event813"},{"id":"event814"},{"id":"event815"},{"id":"event816"},{"id":"event817"},{"id":"event818"},{"id":"event819"},{"id":"event820"},{"id":"event821"},{"id":"event822"},{"id":"event823"},{"id":"event824"},{"id":"event825"},{"id":"event826"},{"id":"event827"},{"id":"event828"},{"id":"event829"},{"id":"event830"},{"id":"event831"},{"id":"event832"},{"id":"event833"},{"id":"event834"},{"id":"event835"},{"id":"event836"},{"id":"event837"},{"id":"event838"},{"id":"event839"},{"id":"event840"},{"id":"event841"},{"id":"event842"},{"id":"event843"},{"id":"event844"},{"id":"event845"},{"id":"event846"},{"id":"event847"},{"id":"event848"},{"id":"event849"},{"id":"event850"},{"id":"event851"},{"id":"event852"},{"id":"event853"},{"id":"event854"},{"id":"event855"},{"id":"event856"},{"id":"event857"},{"id":"event858"},{"id":"event859"},{"id":"event860"},{"id":"event861"},{"id":"event862"},{"id":"event863"},{"id":"event864"},{"id":"event865"},{"id":"event866"},{"id":"event867"},{"id":"event868"},{"id":"event869"},{"id":"event870"},{"id":"event871"},{"id":"event872"},{"id":"event873"},{"id":"event874"},{"id":"event875"},{"id":"event876"},{"id":"event877"},{"id":"event878"},{"id":"event879"},{"id":"event880"},{"id":"event881"},{"id":"event882"},{"id":"event883"},{"id":"event884"},{"id":"event885"},{"id":"event886"},{"id":"event887"},{"id":"event888"},{"id":"event889"},{"id":"event890"},{"id":"event891"},{"id":"event892"},{"id":"event893"},{"id":"event894"},{"id":"event895"},{"id":"event896"},{"id":"event897"},{"id":"event898"},{"id":"event899"},{"id":"event900"},{"id":"event901"},{"id":"event902"},{"id":"event903"},{"id":"event904"},{"id":"event905"},{"id":"event906"},{"id":"event907"},{"id":"event908"},{"id":"event909"},{"id":"event910"},{"id":"event911"},{"id":"event912"},{"id":"event913"},{"id":"event914"},{"id":"event915"},{"id":"event916"},{"id":"event917"},{"id":"event918"},{"id":"event919"},{"id":"event920"},{"id":"event921"},{"id":"event922"},{"id":"event923"},{"id":"event924"},{"id":"event925"},{"id":"event926"},{"id":"event927"},{"id":"event928"},{"id":"event929"},{"id":"event930"},{"id":"event931"},{"id":"event932"},{"id":"event933"},{"id":"event934"},{"id":"event935"},{"id":"event936"},{"id":"event937"},{"id":"event938"},{"id":"event939"},{"id":"event940"},{"id":"event941"},{"id":"event942"},{"id":"event943"},{"id":"event944"},{"id":"event945"},{"id":"event946"},{"id":"event947"},{"id":"event948"},{"id":"event949"},{"id":"event950"},{"id":"event951"},{"id":"event952"},{"id":"event953"},{"id":"event954"},{"id":"event955"},{"id":"event956"},{"id":"event957"},{"id":"event958"},{"id":"event959"},{"id":"event960"},{"id":"event961"},{"id":"event962"},{"id":"event963"},{"id":"event964"},{"id":"event965"},{"id":"event966"},{"id":"event967"},{"id":"event968"},{"id":"event969"},{"id":"event970"},{"id":"event971"},{"id":"event972"},{"id":"event973"},{"id":"event974"},{"id":"event975"},{"id":"event976"},{"id":"event977"},{"id":"event978"},{"id":"event979"},{"id":"event980"},{"id":"event981"},{"id":"event982"},{"id":"event983"},{"id":"event984"},{"id":"event985"},{"id":"event986"},{"id":"event987"},{"id":"event988"},{"id":"event989"},{"id":"event990"},{"id":"event991"},{"id":"event992"},{"id":"event993"},{"id":"event994"},{"id":"event995"},{"id":"event996"},{"id":"event997"},{"id":"event998"},{"id":"event999"},{"id":"event1000"},{"id":"revenue"},{"id":"orders"},{"id":"units"},{"id":"carts"},{"id":"cartviews"},{"id":"instances"},{"id":"checkouts"},{"id":"cartadditions"},{"id":"cartremovals"},{"id":"visits"},{"id":"pageviews"},{"id":"visitorsdaily"},{"id":"uniquevisitors"}]
+
+
+   function getEvars() {
+       var header = document.getElementById("header2");
+       header.innerHTML = '';
+       $('#print').hide();
+       var divContainer = document.getElementById("showData");
+       divContainer.innerHTML = '<div id="loader-wrapper"><div id="loader"></div></div>';
+       var valueInserted = $("input[name='rsidName']").val().replace(/\s/g, '').replace(/,\s*$/, "");
+       var rsids = valueInserted? valueInserted.split(",") : valueInserted;
+       var method = "ReportSuite.GetEvars";
+          var params = {
+           "rsid_list": rsids
+
+       };
+     MarketingCloud.makeRequest(username, secret, method, params, endpoint, function(response) {
+       $('#api-response').html(response.responseText);
+       var responseText = response.responseText;
+       var responseObject = JSON.parse(responseText);
+       reportID = responseObject.reportID;
+        if (responseObject['error_description'] == undefined){
+             var reportEvarData =[];
+               for (var i in evarsID) {
+                   var obj = {};
+                   for (var j in responseObject) {
+                       var reportItem = responseObject[j];
+                       obj.id = evarsID[i].id;
+                       obj[reportItem.rsid + ' - ' + reportItem.site_title] = '';
+                       for (var k in reportItem.evars) {
+                           if (evarsID[i].id == reportItem.evars[k].id)  {
+                               var name = reportItem.evars[k].name ? reportItem.evars[k].name : 'No report name';
+                               var isEnabled = reportItem.evars[k].enabled ? '<span class="badge">&#10004;</span>' : '<span class="badge">&#10008;</span>';
+
+
+                               var desc = reportItem.evars[k].description ? reportItem.evars[k].description : 'No description';
+
+                if( isEnabled.indexOf('10008') >= 0){ } else{
+
+                               //if( desc.indexOf('No description') >= 0){ var desc=""; }
+                               obj[reportItem.rsid + ' - ' + reportItem.site_title] = isEnabled + ' ' + name + '<br><br>' + desc;
+                           }}
+                       }
+                   }
+                   reportEvarData.push(obj);
+               }
+
+               // EXTRACT VALUE FOR HTML HEADER.
+               var col = [];
+               for (var i = 0; i < reportEvarData.length; i++) {
+                   for (var key in reportEvarData[i]) {
+                       if (col.indexOf(key) === -1) {
+                           col.push(key);
+                       }
+                   }
+               }
+               // CREATE DYNAMIC TABLE.
+               var table = document.createElement("table");
+               thead = table.appendChild(document.createElement("thead"));
+               thRow = thead.insertRow(-1)
+               // CREATE HTML TABLE HEADER ROW USING THE EXTRACTED HEADERS ABOVE.
+               for (var i = 0; i < col.length; i++) {
+                   var th = document.createElement("th");      // TABLE HEADER.
+                   th.innerHTML = col[i];
+                   thRow.appendChild(th);
+               }
+               // ADD JSON DATA TO THE TABLE AS ROWS.
+               tbody = table.appendChild(document.createElement("tbody"));
+               for (var i = 0; i < reportEvarData.length; i++) {
+
+                   row = tbody.insertRow(-1);
+
+                   for (var j = 0; j < col.length; j++) {
+                       var tabCell = row.insertCell(-1);
+                       tabCell.innerHTML = reportEvarData[i][col[j]];
+                   }
+               }
+        }
+
+           // FINALLY ADD THE NEWLY CREATED TABLE WITH JSON DATA TO A CONTAINER.
+            header.innerHTML = 'Evars'
+            if (responseObject['error_description'] != undefined){
+                divContainer.innerHTML = "";
+               divContainer.innerHTML = '<div class="alert alert-danger"><strong>Error! </strong>' + responseObject['error_description'] +'</div>';
+           }
+           else {
+              divContainer.innerHTML = "";
+              divContainer.appendChild(table);
+              $('#print').show();
+              // $("table").freezeHeader({ 'offset': '50px' });
+           }
+     });
+       setTimeout(startLoop,8000);
+
+   };
+
+   function getProps() {
+       var header = document.getElementById("header2");
+       header.innerHTML = '';
+       $('#print').hide();
+       var divContainer = document.getElementById("showData");
+       divContainer.innerHTML = '<div id="loader-wrapper"><div id="loader"></div></div>';
+       var valueInserted = $("input[name='rsidName']").val().replace(/\s/g, '').replace(/,\s*$/, "");
+       var rsids = valueInserted? valueInserted.split(",") : valueInserted;
+    var method = "ReportSuite.GetProps";
+          var params = {
+           "rsid_list":  rsids
+
+       };
+
+     MarketingCloud.makeRequest(username, secret, method, params, endpoint, function(response) {
+       $('#api-response').html(response.responseText);
+       var responseText = response.responseText;
+       var responseObject = JSON.parse(responseText);
+       reportID = responseObject.reportID;
+         if (responseObject['error_description'] == undefined){
+             var reportEvarData =[];
+               for (var i in propsID) {
+                   var obj = {};
+                   for (var j in responseObject) {
+                       var reportItem = responseObject[j];
+                        obj.id = propsID[i].id;
+                        obj[reportItem.rsid + ' - ' + reportItem.site_title] = '';
+                       for (var k in reportItem.props) {
+                           if (propsID[i].id == reportItem.props[k].id)  {
+                               var name = reportItem.props[k].name ? reportItem.props[k].name : 'No report name';
+                               var isEnabled = reportItem.props[k].enabled ? '<span class="badge">&#10004;</span>' : '<span class="badge">&#10004;</span>';
+                               var desc = reportItem.props[k].description ? reportItem.props[k].description : 'No description';
+                               obj[reportItem.rsid + ' - ' + reportItem.site_title] = isEnabled + ' ' + name + '<br><br>' + desc;
+                           }
+                       }
+                   }
+                   reportEvarData.push(obj);
+               }
+
+               // EXTRACT VALUE FOR HTML HEADER.
+               var col = [];
+               for (var i = 0; i < reportEvarData.length; i++) {
+                   for (var key in reportEvarData[i]) {
+                       if (col.indexOf(key) === -1) {
+                           col.push(key);
+                       }
+                   }
+               }
+               // CREATE DYNAMIC TABLE.
+               var table = document.createElement("table");
+               thead = table.appendChild(document.createElement("thead"));
+               thRow = thead.insertRow(-1)
+               // CREATE HTML TABLE HEADER ROW USING THE EXTRACTED HEADERS ABOVE.
+               for (var i = 0; i < col.length; i++) {
+                   var th = document.createElement("th");      // TABLE HEADER.
+                   th.innerHTML = col[i];
+                   thRow.appendChild(th);
+               }
+               // ADD JSON DATA TO THE TABLE AS ROWS.
+               tbody = table.appendChild(document.createElement("tbody"));
+               for (var i = 0; i < reportEvarData.length; i++) {
+
+                   row = tbody.insertRow(-1);
+
+                   for (var j = 0; j < col.length; j++) {
+                       var tabCell = row.insertCell(-1);
+                       tabCell.innerHTML = reportEvarData[i][col[j]];
+                   }
+               }
+        }
+            header.innerHTML = 'Props';
+            if (responseObject['error_description'] != undefined){
+                divContainer.innerHTML = "";
+               divContainer.innerHTML = '<div class="alert alert-danger"><strong>Error! </strong>' + responseObject['error_description'] +'</div>';
+           }
+           else {
+              divContainer.innerHTML = "";
+              divContainer.appendChild(table);
+               $('#print').show();
+               //$("table").freezeHeader({ 'offset': '50px' });
+           }
+
+     });
+       setTimeout(startLoop,8000);
+   };
+
+   function getEvents() {
+       var header = document.getElementById("header2");
+       header.innerHTML = '';
+       $('#print').hide();
+       var divContainer = document.getElementById("showData");
+       divContainer.innerHTML = '<div id="loader-wrapper"><div id="loader"></div></div>';
+       var valueInserted = $("input[name='rsidName']").val().replace(/\s/g, '').replace(/,\s*$/, "");
+       var rsids = valueInserted? valueInserted.split(",") : valueInserted;
+       //["uhgmyuhcprod", "uhgmsrprod"]
+    var method = "ReportSuite.GetEvents";
+          var params = {
+           "rsid_list":  rsids
+
+       };
+
+     MarketingCloud.makeRequest(username, secret, method, params, endpoint, function(response) {
+       $('#api-response').html(response.responseText);
+       var responseText = response.responseText;
+       var responseObject = JSON.parse(responseText);
+       reportID = responseObject.reportID;
+         if (responseObject['error_description'] == undefined){
+             var reportEvarData =[];
+               for (var i in events) {
+                   var obj = {};
+                   for (var j in responseObject) {
+                       var reportItem = responseObject[j];
+                        obj.id = events[i].id;
+                        obj[reportItem.rsid + ' - ' + reportItem.site_title] = '';
+                       for (var k in reportItem.events) {
+                           if (events[i].id == reportItem.events[k].id)  {
+                               var name = reportItem.events[k].name ? reportItem.events[k].name : 'No report name';
+                              var isEnabled = reportItem.events[k].type;
+
+                     //  if(isEnabled=="disabled"){var isEnabled='<span class="badge">&#10008;</span>';}
+                       if( isEnabled.indexOf('disabled') >= 0){  }
+                     else {var isEnabled='<span class="badge">&#10004;</span>';}
+
+
+                   if( isEnabled.indexOf('disabled') >= 0){
+
+                             //  var isEnabled = reportItem.events[k].type;
+
+                             var desc ="";
+
+                               } else {var desc = reportItem.events[k].description ? reportItem.events[k].description : 'No description';
+                               obj[reportItem.rsid + ' - ' + reportItem.site_title] = isEnabled + ' ' + name + '<br><br>' + desc;}
+
+                           }
+                       }
+                   }
+                   reportEvarData.push(obj);
+               }
+
+               // EXTRACT VALUE FOR HTML HEADER.
+               var col = [];
+               for (var i = 0; i < reportEvarData.length; i++) {
+                   for (var key in reportEvarData[i]) {
+                       if (col.indexOf(key) === -1) {
+                           col.push(key);
+                       }
+                   }
+               }
+               // CREATE DYNAMIC TABLE.
+               var table = document.createElement("table");
+               thead = table.appendChild(document.createElement("thead"));
+               thRow = thead.insertRow(-1)
+               // CREATE HTML TABLE HEADER ROW USING THE EXTRACTED HEADERS ABOVE.
+               for (var i = 0; i < col.length; i++) {
+                   var th = document.createElement("th");      // TABLE HEADER.
+                   th.innerHTML = col[i];
+                   thRow.appendChild(th);
+               }
+               // ADD JSON DATA TO THE TABLE AS ROWS.
+               tbody = table.appendChild(document.createElement("tbody"));
+               for (var i = 0; i < reportEvarData.length; i++) {
+
+                   row = tbody.insertRow(-1);
+
+                   for (var j = 0; j < col.length; j++) {
+                       var tabCell = row.insertCell(-1);
+                       tabCell.innerHTML = reportEvarData[i][col[j]];
+                   }
+               }
+        }
+            header.innerHTML = 'Events';
+            if (responseObject['error_description'] != undefined){
+                divContainer.innerHTML = "";
+               divContainer.innerHTML = '<div class="alert alert-danger"><strong>Error! </strong>' + responseObject['error_description'] +'</div>';
+           }
+           else {
+              divContainer.innerHTML = "";
+              divContainer.appendChild(table);
+               $('#print').show();
+               //$("table").freezeHeader({ 'offset': '50px' });
+           }
+
+     });
+       setTimeout(startLoop,8000);
+   };
+   </script>
+   <div class="fixed-bottom">
+
+     <!-- Footer -->
+     <footer class="text-center text-lg-start text-white" style="background-color: #1c2331">
+       <!-- Copyright -->
+       <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2)">
+         Contact: Vishal Singh(vishal_singh@optum.com)
+       </div>
+       <!-- Copyright -->
+     </footer>
+     <!-- Footer -->
+
+   </div>
+</body>
+</html>
